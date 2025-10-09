@@ -1,10 +1,10 @@
-package com.br.microservices.orchestrated.inventary_service;
+package com.br.microservices.orchestrated.inventory_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class InventaryServiceApplicationTests {
+class InventoryServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
