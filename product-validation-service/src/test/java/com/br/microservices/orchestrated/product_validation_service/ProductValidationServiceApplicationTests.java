@@ -1,10 +1,10 @@
-package com.br.microservices.orchestrated.product_validation;
+package com.br.microservices.orchestrated.product_validation_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProductValidationApplicationTests {
+class ProductValidationServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
