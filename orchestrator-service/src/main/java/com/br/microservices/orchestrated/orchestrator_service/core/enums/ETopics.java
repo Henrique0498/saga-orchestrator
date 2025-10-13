@@ -1,4 +1,4 @@
-package com.br.microservices.orchestrated.orchestrator_service;
+package com.br.microservices.orchestrated.orchestrator_service.core.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +16,7 @@ public enum ETopics {
     PAYMENT_FAIL("payment-fail"),
     INVENTORY_SUCCESS("inventory-success"),
     INVENTORY_FAIL("inventory-fail"),
-    NOTIFY_ENDING("notify-ending")    ;
+    NOTIFY_ENDING("notify-ending");
 
-    private final String topic;
+    private String topic;
 }

@@ -1,6 +1,7 @@
 package com.br.microservices.orchestrated.payment_service.config.kafka;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 
 import java.util.HashMap;
@@ -17,14 +19,23 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class KafkaConfig {
+    private static final Integer PARTITIONS_COUNT = 1;
+    private static final Integer REPLICATION_COUNT = 1;
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
     @Value("${spring.kafka.consumer.auto-offset-reset}")
     private String autoOffsetReset;
+    @Value("${spring.kafka.topic.orchestrator}")
+    private String orchestratorTopic;
+    @Value("${spring.kafka.topic.payment-success}")
+    private String paymentSuccessTopic;
+    @Value("${spring.kafka.topic.payment-fail}")
+    private String paymentFailTopic;
 
-    private Map<String, Object> consumeProps(){
+    private Map<String, Object> consumeProps() {
         var props = new HashMap<String, Object>();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -36,7 +47,7 @@ public class KafkaConfig {
         return props;
     }
 
-    private Map<String, Object> producerProps(){
+    private Map<String, Object> producerProps() {
         var props = new HashMap<String, Object>();
 
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -46,18 +57,40 @@ public class KafkaConfig {
         return props;
     }
 
+    private NewTopic buildTopic(String topicName) {
+        return TopicBuilder.name(topicName)
+                .partitions(PARTITIONS_COUNT)
+                .replicas(REPLICATION_COUNT)
+                .build();
+    }
+
     @Bean
-    public ConsumerFactory<String, String> consumerFactory(){
+    public ConsumerFactory<String, String> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumeProps());
     }
 
     @Bean
-    public ProducerFactory<String, String> producerFactory(){
+    public ProducerFactory<String, String> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerProps());
     }
 
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory){
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public NewTopic orchestratorTopic() {
+        return buildTopic(orchestratorTopic);
+    }
+
+    @Bean
+    public NewTopic paymentSuccessTopic() {
+        return buildTopic(paymentSuccessTopic);
+    }
+
+    @Bean
+    public NewTopic paymentFailTopic() {
+        return buildTopic(paymentFailTopic);
     }
 }

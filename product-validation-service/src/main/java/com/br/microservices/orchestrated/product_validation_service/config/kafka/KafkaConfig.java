@@ -1,24 +1,35 @@
 package com.br.microservices.orchestrated.product_validation_service.config.kafka;
 
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class KafkaConfig {
+    private static final Integer PARTITIONS_COUNT = 1;
+    private static final Integer REPLICATION_FACTOR = 1;
+
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
     @Value("${spring.kafka.consumer.auto-offset-reset}")
     private String autoOffsetReset;
+    @Value("${spring.kafka.topic.orchestrator}")
+    private String orchestratorTopic;
+    @Value("${spring.kafka.topic.product-validation.success}")
+    private String productValidationSuccessTopic;
+    @Value("${spring.kafka.topic.product-validation.fail}")
+    private String productValidationFailTopic;
 
-    private Map<String, Object> consumeProps(){
+    private Map<String, Object> consumeProps() {
         var props = new HashMap<String, Object>();
 
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -30,7 +41,7 @@ public class KafkaConfig {
         return props;
     }
 
-    private Map<String, Object> producerProps(){
+    private Map<String, Object> producerProps() {
         var props = new HashMap<String, Object>();
 
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -40,18 +51,40 @@ public class KafkaConfig {
         return props;
     }
 
+    private NewTopic buildTopic(String topicName) {
+        return TopicBuilder.name(topicName)
+                .partitions(PARTITIONS_COUNT)
+                .replicas(REPLICATION_FACTOR)
+                .build();
+    }
+
     @Bean
-    public ConsumerFactory<String, String> consumerFactory(){
+    public ConsumerFactory<String, String> consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumeProps());
     }
 
     @Bean
-    public ProducerFactory<String, String> producerFactory(){
+    public ProducerFactory<String, String> producerFactory() {
         return new DefaultKafkaProducerFactory<>(producerProps());
     }
 
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory){
+    public KafkaTemplate<String, String> kafkaTemplate(ProducerFactory<String, String> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
+    }
+
+    @Bean
+    public NewTopic orquestratorTopic() {
+        return buildTopic(orchestratorTopic);
+    }
+
+    @Bean
+    public NewTopic productValidationSuccessTopic() {
+        return buildTopic(productValidationSuccessTopic);
+    }
+
+    @Bean
+    public NewTopic productValidationFailTopic() {
+        return buildTopic(productValidationFailTopic);
     }
 }
