@@ -1,0 +1,5 @@
+package com.br.microservices.orchestrated.product_validation_service.config.exception;
+
+public record ExceptionDetails(int status, String message) {
+
+}
